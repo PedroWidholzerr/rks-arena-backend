@@ -64,6 +64,8 @@ JWT_SECRET=<segredo-forte>
 
 O backend também aceita `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` e `SPRING_DATASOURCE_PASSWORD` caso você prefira passar a URL JDBC completa.
 
+Também aceita `DATABASE_URL` e `POSTGRES_URL` no formato `postgres://...` ou `postgresql://...`, convertendo automaticamente para JDBC.
+
 ### Healthcheck
 
 Use o endpoint abaixo no provedor de deploy:
