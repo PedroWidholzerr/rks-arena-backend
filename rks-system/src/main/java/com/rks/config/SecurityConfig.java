@@ -85,6 +85,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/championships/**", "/api/teams/**",
                                 "/api/players/**", "/api/matches/**", "/api/seasons/**",

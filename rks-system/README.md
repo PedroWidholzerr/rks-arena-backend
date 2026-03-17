@@ -44,6 +44,36 @@ mvn spring-boot:run
 
 A API estará disponível em `http://localhost:8080`
 
+## Deploy no Railway
+
+Se o deploy for feito a partir da pasta `backend`, o Railway/Railpack não encontra o `pom.xml` porque o projeto Java está dentro de `rks-system`.
+
+Para resolver isso, este repositório inclui um `Dockerfile` na raiz de `backend`.
+
+### Variáveis de ambiente recomendadas
+
+```properties
+PORT=8081
+PGHOST=<host-do-postgres>
+PGPORT=5432
+PGDATABASE=<nome-do-banco>
+PGUSER=<usuario>
+PGPASSWORD=<senha>
+JWT_SECRET=<segredo-forte>
+```
+
+O backend também aceita `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` e `SPRING_DATASOURCE_PASSWORD` caso você prefira passar a URL JDBC completa.
+
+### Healthcheck
+
+Use o endpoint abaixo no provedor de deploy:
+
+```text
+/actuator/health
+```
+
+Esse endpoint está liberado sem autenticação para que o Railway consiga validar a aplicação.
+
 ## 📁 Estrutura do Projeto
 
 ```
