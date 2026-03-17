@@ -3,6 +3,7 @@ package com.rks.config;
 import com.rks.entity.*;
 import com.rks.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +39,7 @@ public class DataLoader {
     private PasswordEncoder passwordEncoder;
 
     @Bean
+        @ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
     public CommandLineRunner loadData() {
         return args -> {
             // Create default admin user
