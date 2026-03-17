@@ -4,10 +4,12 @@ import com.rks.repository.UserRepository;
 import com.rks.security.JwtAuthenticationEntryPoint;
 import com.rks.security.JwtAuthenticationFilter;
 
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -66,6 +68,19 @@ public class SecurityConfig {
     }
 
     @Bean
+        @Order(1)
+        public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+
+                http
+                                .securityMatcher(EndpointRequest.toAnyEndpoint())
+                                .csrf(csrf -> csrf.disable())
+                                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
+                return http.build();
+        }
+
+        @Bean
+        @Order(2)
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             JwtAuthenticationFilter jwtAuthenticationFilter
@@ -85,7 +100,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/livez", "/readyz").permitAll()
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/championships/**", "/api/teams/**",
                                 "/api/players/**", "/api/matches/**", "/api/seasons/**",
