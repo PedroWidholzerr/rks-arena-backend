@@ -19,6 +19,7 @@ public class DataSourceConfig {
     @Primary
     public DataSource dataSource(Environment environment) {
         String rawUrl = firstNonBlank(
+            environment.getProperty("spring.datasource.url"),
                 environment.getProperty("SPRING_DATASOURCE_URL"),
                 environment.getProperty("JDBC_DATABASE_URL"),
                 environment.getProperty("DATABASE_URL"),
@@ -32,12 +33,14 @@ public class DataSourceConfig {
                 : buildJdbcUrlFromPgEnvironment(environment);
 
         String username = firstNonBlank(
+            environment.getProperty("spring.datasource.username"),
                 environment.getProperty("SPRING_DATASOURCE_USERNAME"),
                 environment.getProperty("PGUSER"),
                 parsedDatabaseUrl.username()
         );
 
         String password = firstNonBlank(
+            environment.getProperty("spring.datasource.password"),
                 environment.getProperty("SPRING_DATASOURCE_PASSWORD"),
                 environment.getProperty("PGPASSWORD"),
                 parsedDatabaseUrl.password()

@@ -206,11 +206,11 @@ spring.datasource.password=sua-senha
 ### JWT Secret
 Altere em `application.properties`:
 ```properties
-jwt.secret=sua-secret-chave-super-segura
+jwt.secret=sua-secret-chave-super-segura-com-pelo-menos-32-caracteres
 jwt.expiration=86400000  # 24 horas em ms
 ```
 
-⚠️ **IMPORTANTE**: Mude isso em produção! Use uma chave bem forte.
+⚠️ **IMPORTANTE**: Em produção, use uma chave com pelo menos 32 bytes. Se a variável vier menor, a aplicação agora deriva uma chave SHA-256 para evitar falha no startup, mas o ideal continua sendo configurar um segredo forte no ambiente.
 
 ### CORS
 Adicione mais origens em `SecurityConfig.java`:
