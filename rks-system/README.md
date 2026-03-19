@@ -64,14 +64,16 @@ JWT_SECRET=<segredo-forte>
 
 O backend também aceita `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` e `SPRING_DATASOURCE_PASSWORD` caso você prefira passar a URL JDBC completa.
 
-Também aceita `DATABASE_URL` e `POSTGRES_URL` no formato `postgres://...` ou `postgresql://...`, convertendo automaticamente para JDBC.
+Também aceita `DATABASE_URL`, `DATABASE_PRIVATE_URL`, `DATABASE_PUBLIC_URL` e `POSTGRES_URL` no formato `postgres://...` ou `postgresql://...`, convertendo automaticamente para JDBC.
+
+Se o Railway não injetar nenhuma dessas variáveis no serviço do backend, a aplicação cai no fallback local `localhost:5432`, então o Postgres precisa estar linkado ao serviço ou as variáveis precisam ser definidas manualmente.
 
 ### Healthcheck
 
 Use o endpoint abaixo no provedor de deploy:
 
 ```text
-/actuator/health
+/livez
 ```
 
 Esse endpoint está liberado sem autenticação para que o Railway consiga validar a aplicação.

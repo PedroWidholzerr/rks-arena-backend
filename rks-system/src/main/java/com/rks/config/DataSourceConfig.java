@@ -19,11 +19,13 @@ public class DataSourceConfig {
     @Primary
     public DataSource dataSource(Environment environment) {
         String rawUrl = firstNonBlank(
-            environment.getProperty("spring.datasource.url"),
                 environment.getProperty("SPRING_DATASOURCE_URL"),
                 environment.getProperty("JDBC_DATABASE_URL"),
+                environment.getProperty("DATABASE_PRIVATE_URL"),
+                environment.getProperty("DATABASE_PUBLIC_URL"),
                 environment.getProperty("DATABASE_URL"),
-                environment.getProperty("POSTGRES_URL")
+                environment.getProperty("POSTGRES_URL"),
+                environment.getProperty("spring.datasource.url")
         );
 
         ParsedDatabaseUrl parsedDatabaseUrl = parseDatabaseUrl(rawUrl);
@@ -33,17 +35,21 @@ public class DataSourceConfig {
                 : buildJdbcUrlFromPgEnvironment(environment);
 
         String username = firstNonBlank(
-            environment.getProperty("spring.datasource.username"),
                 environment.getProperty("SPRING_DATASOURCE_USERNAME"),
                 environment.getProperty("PGUSER"),
-                parsedDatabaseUrl.username()
+                environment.getProperty("POSTGRES_USER"),
+                environment.getProperty("DB_USER"),
+                parsedDatabaseUrl.username(),
+                environment.getProperty("spring.datasource.username")
         );
 
         String password = firstNonBlank(
-            environment.getProperty("spring.datasource.password"),
                 environment.getProperty("SPRING_DATASOURCE_PASSWORD"),
                 environment.getProperty("PGPASSWORD"),
-                parsedDatabaseUrl.password()
+                environment.getProperty("POSTGRES_PASSWORD"),
+                environment.getProperty("DB_PASSWORD"),
+                parsedDatabaseUrl.password(),
+                environment.getProperty("spring.datasource.password")
         );
 
         return DataSourceBuilder.create()
@@ -55,9 +61,24 @@ public class DataSourceConfig {
     }
 
     private String buildJdbcUrlFromPgEnvironment(Environment environment) {
-        String host = environment.getProperty("PGHOST", "localhost");
-        String port = environment.getProperty("PGPORT", "5432");
-        String database = environment.getProperty("PGDATABASE", "rks_arena");
+        String host = firstNonBlank(
+            environment.getProperty("PGHOST"),
+            environment.getProperty("POSTGRES_HOST"),
+            environment.getProperty("DB_HOST"),
+            "localhost"
+        );
+        String port = firstNonBlank(
+            environment.getProperty("PGPORT"),
+            environment.getProperty("POSTGRES_PORT"),
+            environment.getProperty("DB_PORT"),
+            "5432"
+        );
+        String database = firstNonBlank(
+            environment.getProperty("PGDATABASE"),
+            environment.getProperty("POSTGRES_DB"),
+            environment.getProperty("DB_NAME"),
+            "rks_arena"
+        );
         return "jdbc:postgresql://" + host + ":" + port + "/" + database;
     }
 
