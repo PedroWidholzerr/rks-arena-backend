@@ -41,15 +41,19 @@ public class DataLoader {
     @Bean
     public CommandLineRunner ensureAdminUser() {
         return args -> {
-            if (userRepository.count() == 0) {
-                User admin = User.builder()
-                        .email("nortonSafado@gostoso.com")
-                        .password(passwordEncoder.encode("Senha1234"))
-                        .name("Norton")
-                        .role(User.UserRole.ADMIN)
-                        .build();
-                userRepository.save(admin);
-                System.out.println("✓ Admin user created: nortonSafado@gostoso.com");
+            try {
+                if (userRepository.count() == 0) {
+                    User admin = User.builder()
+                            .email("nortonSafado@gostoso.com")
+                            .password(passwordEncoder.encode("Senha1234"))
+                            .name("Norton")
+                            .role(User.UserRole.ADMIN)
+                            .build();
+                    userRepository.save(admin);
+                    System.out.println("✓ Admin user created: nortonSafado@gostoso.com");
+                }
+            } catch (Exception e) {
+                System.err.println("⚠ Could not seed admin user: " + e.getMessage());
             }
         };
     }
