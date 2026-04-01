@@ -15,4 +15,8 @@ public class ChampionshipDTO {
     private String description;
     private String seasonId;
     private String status;
+    private Integer bestOf;
+    private Integer pointsPerWin;
+    private Integer pointsPerLoss;
+    private Integer pointsPerLossDecider;
 }

@@ -2,6 +2,7 @@ package com.rks.controller;
 
 import com.rks.dto.ChampionshipDTO;
 import com.rks.service.ChampionshipService;
+import com.rks.service.StandingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,9 @@ import java.util.Map;
 public class ChampionshipController {
     @Autowired
     private ChampionshipService championshipService;
+
+    @Autowired
+    private StandingService standingService;
 
     @GetMapping
     public ResponseEntity<List<ChampionshipDTO>> getAllChampionships(
@@ -83,6 +87,17 @@ public class ChampionshipController {
         try {
             List<String> teamIds = body.get("teamIds");
             championshipService.setTeamsForChampionship(id, teamIds != null ? teamIds : List.of());
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/{id}/recalculate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> recalculateStandings(@PathVariable String id) {
+        try {
+            standingService.recalculateStandings(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

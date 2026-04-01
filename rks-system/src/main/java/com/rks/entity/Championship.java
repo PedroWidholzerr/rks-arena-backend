@@ -29,6 +29,18 @@ public class Championship {
     @Enumerated(EnumType.STRING)
     private ChampionshipStatus status = ChampionshipStatus.UPCOMING;
 
+    @Column
+    private Integer bestOf = 3;
+
+    @Column
+    private Integer pointsPerWin = 2;
+
+    @Column
+    private Integer pointsPerLoss = 0;
+
+    @Column
+    private Integer pointsPerLossDecider = 1;
+
     @OneToMany(mappedBy = "championship", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Match> matches;
 

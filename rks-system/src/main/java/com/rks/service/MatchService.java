@@ -70,6 +70,14 @@ public class MatchService {
                 .build();
         match = matchRepository.save(match);
         standingService.ensureStandingsExist(championship.getId(), teamA.getId(), teamB.getId());
+
+        // Update standings if match already has scores
+        int sA = match.getScoreA() != null ? match.getScoreA() : 0;
+        int sB = match.getScoreB() != null ? match.getScoreB() : 0;
+        if (sA != 0 || sB != 0) {
+            standingService.updateStandingsForMatch(match);
+        }
+
         return convertToDTO(match);
     }
 

@@ -57,6 +57,10 @@ public class ChampionshipService {
                 .status(dto.getStatus() != null
                         ? Championship.ChampionshipStatus.valueOf(dto.getStatus().toUpperCase())
                         : Championship.ChampionshipStatus.UPCOMING)
+                .bestOf(dto.getBestOf() != null ? dto.getBestOf() : 3)
+                .pointsPerWin(dto.getPointsPerWin() != null ? dto.getPointsPerWin() : 2)
+                .pointsPerLoss(dto.getPointsPerLoss() != null ? dto.getPointsPerLoss() : 0)
+                .pointsPerLossDecider(dto.getPointsPerLossDecider() != null ? dto.getPointsPerLossDecider() : 1)
                 .build();
         championship = championshipRepository.save(championship);
         return convertToDTO(championship);
@@ -69,6 +73,18 @@ public class ChampionshipService {
         championship.setDescription(dto.getDescription());
         if (dto.getStatus() != null) {
             championship.setStatus(Championship.ChampionshipStatus.valueOf(dto.getStatus().toUpperCase()));
+        }
+        if (dto.getBestOf() != null) {
+            championship.setBestOf(dto.getBestOf());
+        }
+        if (dto.getPointsPerWin() != null) {
+            championship.setPointsPerWin(dto.getPointsPerWin());
+        }
+        if (dto.getPointsPerLoss() != null) {
+            championship.setPointsPerLoss(dto.getPointsPerLoss());
+        }
+        if (dto.getPointsPerLossDecider() != null) {
+            championship.setPointsPerLossDecider(dto.getPointsPerLossDecider());
         }
         championship = championshipRepository.save(championship);
         return convertToDTO(championship);
@@ -125,6 +141,10 @@ public class ChampionshipService {
                 .description(championship.getDescription())
                 .seasonId(championship.getSeason().getId())
                 .status(championship.getStatus().name().toLowerCase())
+                .bestOf(championship.getBestOf())
+                .pointsPerWin(championship.getPointsPerWin())
+                .pointsPerLoss(championship.getPointsPerLoss())
+                .pointsPerLossDecider(championship.getPointsPerLossDecider())
                 .build();
     }
 }
