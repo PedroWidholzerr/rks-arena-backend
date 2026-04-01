@@ -39,20 +39,25 @@ public class DataLoader {
     private PasswordEncoder passwordEncoder;
 
     @Bean
-        @ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
-    public CommandLineRunner loadData() {
+    public CommandLineRunner ensureAdminUser() {
         return args -> {
-            // Create default admin user
             if (userRepository.count() == 0) {
                 User admin = User.builder()
-                        .email("admin@example.com")
-                        .password(passwordEncoder.encode("admin123"))
-                        .name("Admin User")
+                        .email("nortonSafado@gostoso.com")
+                        .password(passwordEncoder.encode("Senha1234"))
+                        .name("Norton")
                         .role(User.UserRole.ADMIN)
                         .build();
                 userRepository.save(admin);
-                System.out.println("✓ Admin user created: admin@example.com / admin123");
+                System.out.println("✓ Admin user created: nortonSafado@gostoso.com");
             }
+        };
+    }
+
+    @Bean
+        @ConditionalOnProperty(prefix = "app.seed", name = "enabled", havingValue = "true")
+    public CommandLineRunner loadData() {
+        return args -> {
 
             // Create seasons
             if (seasonRepository.count() == 0) {
@@ -205,8 +210,8 @@ public class DataLoader {
                 System.out.println("\n" +
                         "✅ Database populated with sample data!\n" +
                         "🔐 Login credentials:\n" +
-                        "   Email: admin@example.com\n" +
-                        "   Password: admin123\n" +
+                        "   Email: nortonSafado@gostoso.com\n" +
+                        "   Password: Senha1234\n" +
                         "🚀 API running at: http://localhost:8080\n"
                 );
             }
