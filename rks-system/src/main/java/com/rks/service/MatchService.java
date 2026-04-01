@@ -88,6 +88,7 @@ public class MatchService {
         // Reset standings for old scores before updating
         standingService.resetStandingsForMatch(match);
         
+        if (dto.getScheduledAt() != null) match.setScheduledAt(dto.getScheduledAt());
         if (dto.getScoreA() != null) match.setScoreA(dto.getScoreA());
         if (dto.getScoreB() != null) match.setScoreB(dto.getScoreB());
         if (dto.getComment() != null) match.setComment(dto.getComment());
