@@ -19,4 +19,6 @@ WORKDIR /app
 
 COPY --from=build /app/rks-system/target/*.jar app.jar
 
-CMD ["java", "-jar", "app.jar"]
+EXPOSE 8081
+
+CMD ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
