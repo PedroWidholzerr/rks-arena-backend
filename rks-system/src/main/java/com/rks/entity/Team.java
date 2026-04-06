@@ -27,6 +27,13 @@ public class Team {
     @Column
     private String logoUrl;
 
+    @Lob
+    @Column(columnDefinition = "BYTEA")
+    private byte[] logoData;
+
+    @Column
+    private String logoContentType;
+
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Player> players;
 

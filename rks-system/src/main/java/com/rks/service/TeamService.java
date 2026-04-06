@@ -52,16 +52,23 @@ public class TeamService {
         return convertToDTO(team);
     }
 
-    public TeamDTO updateTeamLogo(String id, String logoUrl) {
+    public TeamDTO updateTeamLogo(String id, String logoUrl, byte[] logoData, String contentType) {
         Team team = teamRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Team not found"));
         team.setLogoUrl(logoUrl);
+        team.setLogoData(logoData);
+        team.setLogoContentType(contentType);
         team = teamRepository.save(team);
         return convertToDTO(team);
     }
 
     public void deleteTeam(String id) {
         teamRepository.deleteById(id);
+    }
+
+    public Team getTeamEntity(String id) {
+        return teamRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Team not found"));
     }
 
     private TeamDTO convertToDTO(Team team) {

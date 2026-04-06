@@ -1,11 +1,9 @@
 package com.rks.controller;
 
 import com.rks.dto.TeamDTO;
+import com.rks.entity.Team;
 import com.rks.service.TeamService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,14 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/teams")
@@ -29,16 +21,9 @@ public class TeamController {
     @Autowired
     private TeamService teamService;
 
-    private final Path logoUploadDir;
-
-    public TeamController(@Value("${app.upload.team-logos-dir:uploads/team-logos}") String teamLogosDir) {
-        this.logoUploadDir = Paths.get(teamLogosDir).toAbsolutePath().normalize();
-        try {
-            Files.createDirectories(this.logoUploadDir);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not initialize team logo directory", e);
-        }
-    }
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
+            "image/png", "image/jpeg", "image/gif", "image/webp", "image/svg+xml"
+    );
 
     @GetMapping
     public ResponseEntity<List<TeamDTO>> getAllTeams() {
@@ -82,55 +67,44 @@ public class TeamController {
                 return ResponseEntity.badRequest().build();
             }
 
-            String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "logo";
-            String extension = "";
-            int extensionIndex = originalFilename.lastIndexOf('.');
-            if (extensionIndex >= 0) {
-                extension = originalFilename.substring(extensionIndex);
-            }
-
-            String storedFilename = id + "-" + UUID.randomUUID() + extension;
-            Path targetPath = logoUploadDir.resolve(storedFilename).normalize();
-            if (!targetPath.startsWith(logoUploadDir)) {
+            String contentType = file.getContentType();
+            if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
                 return ResponseEntity.badRequest().build();
             }
 
-            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            byte[] logoData = file.getBytes();
+            String logoUrl = "/api/teams/" + id + "/logo-image";
+            return ResponseEntity.ok(teamService.updateTeamLogo(id, logoUrl, logoData, contentType));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
-            String logoUrl = "/api/teams/logos/" + storedFilename;
-            return ResponseEntity.ok(teamService.updateTeamLogo(id, logoUrl));
+    @GetMapping("/{id}/logo-image")
+    public ResponseEntity<byte[]> getLogoImage(@PathVariable String id) {
+        try {
+            Team team = teamService.getTeamEntity(id);
+            if (team.getLogoData() == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            MediaType mediaType = MediaType.parseMediaType(
+                    team.getLogoContentType() != null ? team.getLogoContentType() : "image/png"
+            );
+
+            return ResponseEntity.ok()
+                    .contentType(mediaType)
+                    .header(HttpHeaders.CACHE_CONTROL, "public, max-age=86400")
+                    .body(team.getLogoData());
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping("/logos/{filename:.+}")
-    public ResponseEntity<Resource> getLogo(@PathVariable String filename) {
-        try {
-            Path filePath = logoUploadDir.resolve(filename).normalize();
-            if (!filePath.startsWith(logoUploadDir)) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            Resource resource = new UrlResource(filePath.toUri());
-            if (!resource.exists() || !resource.isReadable()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            String contentType = Files.probeContentType(filePath);
-            MediaType mediaType = contentType != null
-                    ? MediaType.parseMediaType(contentType)
-                    : MediaType.APPLICATION_OCTET_STREAM;
-
-            return ResponseEntity.ok()
-                    .contentType(mediaType)
-                    .header(HttpHeaders.CACHE_CONTROL, "public, max-age=86400")
-                    .body(resource);
-        } catch (MalformedURLException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<Void> getLogoLegacy(@PathVariable String filename) {
+        // Legacy endpoint - logos are now served from DB via /{id}/logo-image
+        return ResponseEntity.status(HttpStatus.GONE).build();
     }
 
     @DeleteMapping("/{id}")
