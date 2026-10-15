@@ -1,4 +1,4 @@
-package com.rks.controller;
+package com.rks.api.publico;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
