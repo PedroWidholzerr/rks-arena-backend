@@ -19,6 +19,9 @@ WORKDIR /app
 
 COPY --from=build /app/rks-system/target/*.jar app.jar
 
+# Render free tem 512 MB: compilador leve e heap limitado (NFR-4)
+ENV JAVA_TOOL_OPTIONS="-XX:TieredStopAtLevel=1 -Xmx300m"
+
 EXPOSE 8080
 
 CMD ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
