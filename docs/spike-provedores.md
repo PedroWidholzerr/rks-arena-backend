@@ -42,7 +42,7 @@ Estado: **aguardando o mantenedor** (criar as contas e preencher a tabela).
 | Supabase free: 2 projetos (produção e teste) sem cartão `[ASSUMPTION]` | Criar os dois projetos | **refutado** nesta conta: só é possível 1 projeto (informado pelo mantenedor em 2026-10-15). Ver "Decisão: projeto Supabase único" abaixo. |
 | Supabase free: limites de banco, Storage e banda | Anotar do painel | pendente |
 | PostgreSQL 17 disponível no Supabase `[ASSUMPTION]` | Log do Flyway | **confirmado** (17.11, projeto de teste) |
-| Turnstile: site criado sem cartão | Criar o site | pendente |
+| Turnstile: site criado sem cartão `[ASSUMPTION]` | Criar o site | **confirmado** em 2026-10-15: criado sem cartão (informado pelo mantenedor). As chaves ficam em `.env` local e entram em uso no Epic 4. |
 | Vercel Hobby: build com Node 22.x `[ASSUMPTION]` | Configuração do projeto | pendente |
 | Node 22.x disponível para o build | Painel da Vercel | pendente |
 
