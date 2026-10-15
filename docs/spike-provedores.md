@@ -37,8 +37,8 @@ Estado: **aguardando o mantenedor** (criar as contas e preencher a tabela).
 
 | Item | Como verificar | Resultado |
 |---|---|---|
-| Render free: serviço Docker sem cartão | Criar o serviço Docker | pendente |
-| Render free: RAM, horas por mês, tempo de repouso, banda | Anotar do painel | pendente |
+| Render free: serviço Docker sem cartão `[ASSUMPTION]` | Criar o serviço Docker | **confirmado** em 2026-10-15: serviço `rks-arena-backend` criado e no ar (`/readyz` 200); falta o mantenedor confirmar que nenhuma etapa pediu cartão |
+| Render free: RAM, horas por mês, tempo de repouso, banda | Anotar do painel | RAM **512 MB** e **0,1 CPU** (informado pelo mantenedor). Horas, banda e repouso: pendente. O `-Xmx300m` do Dockerfile cabe nos 512 MB com folga para metaspace e threads. A CPU de 0,1 explica o cold start mais lento (ver medições em `docs/deploy-render.md`). |
 | Supabase free: 2 projetos (produção e teste) sem cartão `[ASSUMPTION]` | Criar os dois projetos | **refutado** nesta conta: só é possível 1 projeto (informado pelo mantenedor em 2026-10-15). Ver "Decisão: projeto Supabase único" abaixo. |
 | Supabase free: limites de banco, Storage e banda | Anotar do painel | pendente |
 | PostgreSQL 17 disponível no Supabase `[ASSUMPTION]` | Log do Flyway | **confirmado** (17.11, projeto de teste) |
