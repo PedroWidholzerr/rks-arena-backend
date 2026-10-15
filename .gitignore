@@ -1,0 +1,7 @@
+# Segredos
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea
