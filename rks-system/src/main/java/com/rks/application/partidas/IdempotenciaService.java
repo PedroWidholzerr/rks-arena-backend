@@ -39,7 +39,8 @@ public class IdempotenciaService {
 
     /** O escopo identifica rota e corpo: a mesma chave só se repete para o mesmo pedido. */
     public String escopo(String rota, Object corpo) {
-        return rota + "#" + sha256(json.writeValueAsString(corpo));
+        // A coluna escopo tem 80 caracteres: guarda só o hash de rota e corpo (64 hexadecimais).
+        return sha256(rota + "#" + json.writeValueAsString(corpo));
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
