@@ -2,6 +2,7 @@ package com.rks.application.partidas;
 
 import com.rks.application.auditoria.AuditoriaService;
 import com.rks.application.erro.ErroDeRegra;
+import com.rks.application.imagens.ImageStorage;
 import com.rks.domain.rules.EstadoPartida;
 import com.rks.domain.rules.MaquinaDePartida;
 import com.rks.domain.rules.MaquinaDePartida.Placar;
@@ -38,7 +39,7 @@ import java.util.UUID;
 @Service
 public class PartidaService {
 
-    public record TimeResumo(UUID id, String nome, String tag) {
+    public record TimeResumo(UUID id, String nome, String tag, String logoUrl) {
     }
 
     public record Partida(UUID id, UUID faseId, UUID campeonatoId, int rodada, int posicao, TimeResumo timeA,
@@ -54,10 +55,12 @@ public class PartidaService {
     private final ElencoMembroRepositorio elencoMembros;
     private final TimeRepositorio times;
     private final AuditoriaService auditoria;
+    private final ImageStorage armazenamento;
 
     public PartidaService(PartidaRepositorio partidas, FaseRepositorio fases, CampeonatoRepositorio campeonatos,
                           ParticipacaoRepositorio participacoes, ElencoMembroRepositorio elencoMembros,
-                          TimeRepositorio times, AuditoriaService auditoria) {
+                          TimeRepositorio times, AuditoriaService auditoria, ImageStorage armazenamento) {
+        this.armazenamento = armazenamento;
         this.partidas = partidas;
         this.fases = fases;
         this.campeonatos = campeonatos;
@@ -316,7 +319,7 @@ public class PartidaService {
             return null;
         }
         TimeEntidade t = times.findById(id).orElse(null);
-        return t == null ? null : new TimeResumo(t.getId(), t.getNome(), t.getTag());
+        return t == null ? null : new TimeResumo(t.getId(), t.getNome(), t.getTag(), armazenamento.publicUrl(t.getLogoUrl()));
     }
 
     private static Map<String, Object> resumo(PartidaEntidade p) {
