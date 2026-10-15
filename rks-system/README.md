@@ -59,7 +59,7 @@ PGPORT=5432
 PGDATABASE=<nome-do-banco>
 PGUSER=<usuario>
 PGPASSWORD=<senha>
-JWT_SECRET=<segredo-forte>
+JWT_SECRET=<defina-no-ambiente>
 ```
 
 O backend também aceita `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` e `SPRING_DATASOURCE_PASSWORD` caso você prefira passar a URL JDBC completa.
