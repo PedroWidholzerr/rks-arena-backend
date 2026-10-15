@@ -90,7 +90,7 @@ class SegurancaRotasTest {
     void areaAdminComTokenDeAdminRetorna200() throws Exception {
         String token = tokenDeAdmin(false);
         when(administradores.listar()).thenReturn(List.of(
-                new AdministradorService.Administrador(UUID.randomUUID(), EMAIL, true, false, Instant.now())));
+                new AdministradorService.Administrador(UUID.randomUUID(), EMAIL, "Pedro", true, false, Instant.now())));
 
         mvc.perform(get("/api/admin/users").header("Authorization", token))
                 .andExpect(status().isOk())
@@ -108,7 +108,7 @@ class SegurancaRotasTest {
     void quemPrecisaTrocarASenhaSoAcessaATroca() throws Exception {
         String token = tokenDeAdmin(true);
         when(autenticacao.trocarSenha(anyString(), anyString(), anyString()))
-                .thenReturn(new AutenticacaoService.Sessao("novo-token", false, Instant.now()));
+                .thenReturn(new AutenticacaoService.Sessao("novo-token", false, Instant.now(), "Pedro"));
 
         mvc.perform(post("/api/auth/password").header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -130,7 +130,7 @@ class SegurancaRotasTest {
     @Test
     void loginEhLivre() throws Exception {
         when(autenticacao.entrar(anyString(), anyString()))
-                .thenReturn(new AutenticacaoService.Sessao("tok", true, Instant.now()));
+                .thenReturn(new AutenticacaoService.Sessao("tok", true, Instant.now(), null));
 
         mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"" + EMAIL + "\",\"senha\":\"qualquer\"}"))

@@ -21,7 +21,7 @@ public class AuthController {
     public record TrocaSenhaRequest(@NotBlank String senhaAtual, @NotBlank String novaSenha) {
     }
 
-    public record SessaoResponse(String token, boolean trocarSenha, Instant expiraEm) {
+    public record SessaoResponse(String token, boolean trocarSenha, Instant expiraEm, String nome) {
     }
 
     private final AutenticacaoService autenticacao;
@@ -41,6 +41,6 @@ public class AuthController {
     }
 
     private static SessaoResponse paraResposta(AutenticacaoService.Sessao sessao) {
-        return new SessaoResponse(sessao.token(), sessao.trocarSenha(), sessao.expiraEm());
+        return new SessaoResponse(sessao.token(), sessao.trocarSenha(), sessao.expiraEm(), sessao.nome());
     }
 }

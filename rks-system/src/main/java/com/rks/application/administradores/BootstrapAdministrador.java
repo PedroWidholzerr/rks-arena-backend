@@ -28,6 +28,7 @@ public class BootstrapAdministrador implements ApplicationRunner {
     private final UsuarioRepositorio usuarios;
     private final PasswordEncoder codificador;
     private final String email;
+    private final String nome;
     private final String senhaInicial;
     private final boolean redefinirNaSubida;
 
@@ -35,11 +36,13 @@ public class BootstrapAdministrador implements ApplicationRunner {
             UsuarioRepositorio usuarios,
             PasswordEncoder codificador,
             @Value("${app.admin.email:}") String email,
+            @Value("${app.admin.nome:}") String nome,
             @Value("${app.admin.initial-password:}") String senhaInicial,
             @Value("${app.admin.reset-on-boot:false}") boolean redefinirNaSubida) {
         this.usuarios = usuarios;
         this.codificador = codificador;
         this.email = email == null ? "" : email.strip();
+        this.nome = nome == null ? "" : nome.strip();
         this.senhaInicial = senhaInicial == null ? "" : senhaInicial;
         this.redefinirNaSubida = redefinirNaSubida;
     }
@@ -67,7 +70,9 @@ public class BootstrapAdministrador implements ApplicationRunner {
                     + "nada foi criado. Reative-o por outro administrador ou use ADMIN_RESET_ON_BOOT.");
             return;
         }
-        usuarios.save(new UsuarioEntidade(email, codificador.encode(senhaInicial), true));
+        UsuarioEntidade admin = new UsuarioEntidade(email, codificador.encode(senhaInicial), true);
+        admin.setNome(AdministradorService.nomeLimpo(nome));
+        usuarios.save(admin);
         log.info("Primeiro administrador criado a partir do ambiente; a troca de senha é obrigatória no primeiro login.");
     }
 

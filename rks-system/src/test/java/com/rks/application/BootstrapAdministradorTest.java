@@ -33,7 +33,7 @@ class BootstrapAdministradorTest {
     }
 
     private BootstrapAdministrador com(String email, String senha, boolean redefinir) {
-        return new BootstrapAdministrador(usuarios, codificador, email, senha, redefinir);
+        return new BootstrapAdministrador(usuarios, codificador, email, "", senha, redefinir);
     }
 
     private void executar(BootstrapAdministrador bootstrap) {

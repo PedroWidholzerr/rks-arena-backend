@@ -140,4 +140,41 @@ class AdministradorServiceTest {
 
         assertEquals(ErroDeRegra.Tipo.NAO_ENCONTRADO, erro.tipo());
     }
+
+    @Test
+    void administradorDefineOProprioNomeSemEspacosSobrando() {
+        UsuarioEntidade eu = new UsuarioEntidade("eu@rks.com", "h", false);
+        when(usuarios.buscarPorEmail("eu@rks.com")).thenReturn(Optional.of(eu));
+
+        AdministradorService.Administrador resultado = servico.atualizarNome("eu@rks.com", "  Pedro   Costa  ");
+
+        assertEquals("Pedro Costa", resultado.nome());
+        assertEquals("Pedro Costa", eu.getNome());
+        verify(auditoria).registrar(eq("eu@rks.com"), eq("usuario"), eq(eu.getId()), eq("NOME"), any(), any());
+    }
+
+    @Test
+    void nomeVazioVoltaAMostrarOEmail() {
+        UsuarioEntidade eu = new UsuarioEntidade("eu@rks.com", "h", false);
+        eu.setNome("Antigo");
+        when(usuarios.buscarPorEmail("eu@rks.com")).thenReturn(Optional.of(eu));
+
+        assertEquals(null, servico.atualizarNome("eu@rks.com", "   ").nome());
+        assertEquals(null, AdministradorService.nomeLimpo(null));
+    }
+
+    @Test
+    void nomeCom121CaracteresEhRecusado() {
+        assertEquals("NOME_INVALIDO", assertThrows(ErroDeRegra.class, () -> AdministradorService.nomeLimpo("a".repeat(121))).codigo());
+    }
+
+    @Test
+    void criaAdministradorJaComNome() {
+        when(usuarios.countByAtivoTrue()).thenReturn(1L);
+        when(usuarios.buscarPorEmail("novo@rks.com")).thenReturn(Optional.empty());
+
+        AdministradorService.Criado criado = servico.criar("eu@rks.com", "novo@rks.com", "Maria");
+
+        assertEquals("Maria", criado.administrador().nome());
+    }
 }

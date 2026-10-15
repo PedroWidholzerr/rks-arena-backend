@@ -4,6 +4,7 @@ import com.rks.application.administradores.AdministradorService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +23,10 @@ import java.util.UUID;
 @RequestMapping("/api/admin/users")
 public class AdministradoresController {
 
-    public record NovoAdministradorRequest(@NotBlank String email) {
+    public record NovoAdministradorRequest(@NotBlank String email, @Size(max = 120) String nome) {
+    }
+
+    public record NomeRequest(@Size(max = 120) String nome) {
     }
 
     public record AtivoRequest(@NotNull Boolean ativo) {
@@ -43,7 +47,13 @@ public class AdministradoresController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public AdministradorService.Criado criar(Authentication quem, @Valid @RequestBody NovoAdministradorRequest pedido) {
-        return administradores.criar(quem.getName(), pedido.email());
+        return administradores.criar(quem.getName(), pedido.email(), pedido.nome());
+    }
+
+    /** Cada administrador define o próprio nome de exibição (vazio volta a mostrar o e-mail). */
+    @PatchMapping("/me")
+    public AdministradorService.Administrador definirMeuNome(Authentication quem, @Valid @RequestBody NomeRequest pedido) {
+        return administradores.atualizarNome(quem.getName(), pedido.nome());
     }
 
     @PatchMapping("/{id}/active")

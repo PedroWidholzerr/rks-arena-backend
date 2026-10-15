@@ -28,6 +28,9 @@ public class UsuarioEntidade {
     @Column(name = "senha_hash", nullable = false)
     private String senhaHash;
 
+    /** Nome de exibição (opcional); sem ele a tela mostra o e-mail. */
+    private String nome;
+
     @Column(nullable = false)
     private String papel = "ADMIN";
 

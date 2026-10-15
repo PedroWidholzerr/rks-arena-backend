@@ -33,7 +33,7 @@ public class AdministradorService {
     private static final String ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
     private static final SecureRandom ALEATORIO = new SecureRandom();
 
-    public record Administrador(UUID id, String email, boolean ativo, boolean trocarSenha, Instant criadoEm) {
+    public record Administrador(UUID id, String email, String nome, boolean ativo, boolean trocarSenha, Instant criadoEm) {
     }
 
     public record Criado(Administrador administrador, String senhaTemporaria) {
@@ -54,9 +54,13 @@ public class AdministradorService {
         return usuarios.findAllByOrderByCriadoEmAsc().stream().map(AdministradorService::paraDto).toList();
     }
 
+    public Criado criar(String autor, String email) {
+        return criar(autor, email, null);
+    }
+
     /** Cria o administrador com senha temporária (mostrada uma única vez) e troca obrigatória. */
     @Transactional
-    public Criado criar(String autor, String email) {
+    public Criado criar(String autor, String email, String nome) {
         String limpo = email == null ? "" : email.strip();
         if (!EMAIL.matcher(limpo).matches()) {
             throw ErroDeRegra.regra("EMAIL_INVALIDO", "Informe um e-mail válido.");
@@ -70,9 +74,25 @@ public class AdministradorService {
             throw ErroDeRegra.conflito("EMAIL_JA_CADASTRADO", "Já existe um administrador com este e-mail.");
         }
         String temporaria = senhaTemporaria();
-        UsuarioEntidade novo = usuarios.save(new UsuarioEntidade(limpo, codificador.encode(temporaria), true));
-        auditoria.registrar(autor, "usuario", novo.getId(), "CRIAR", null, Map.of("email", novo.getEmail()));
+        UsuarioEntidade novo = new UsuarioEntidade(limpo, codificador.encode(temporaria), true);
+        novo.setNome(nomeLimpo(nome));
+        novo = usuarios.save(novo);
+        auditoria.registrar(autor, "usuario", novo.getId(), "CRIAR", null,
+                Map.of("email", novo.getEmail(), "nome", novo.getNome() == null ? "" : novo.getNome()));
         return new Criado(paraDto(novo), temporaria);
+    }
+
+    /** Cada administrador define o próprio nome de exibição; vazio volta a mostrar o e-mail. */
+    @Transactional
+    public Administrador atualizarNome(String email, String nome) {
+        UsuarioEntidade u = usuarios.buscarPorEmail(email)
+                .orElseThrow(() -> ErroDeRegra.naoEncontrado("ADMINISTRADOR_NAO_ENCONTRADO", "Administrador não encontrado."));
+        String antes = u.getNome();
+        u.setNome(nomeLimpo(nome));
+        u = usuarios.save(u);
+        auditoria.registrar(email, "usuario", u.getId(), "NOME",
+                Map.of("nome", antes == null ? "" : antes), Map.of("nome", u.getNome() == null ? "" : u.getNome()));
+        return paraDto(u);
     }
 
     @Transactional
@@ -98,8 +118,20 @@ public class AdministradorService {
         return paraDto(alvo);
     }
 
+    /** Nome de exibição: sem espaços nas pontas, até 120 caracteres; vazio vira "sem nome". */
+    static String nomeLimpo(String nome) {
+        String limpo = nome == null ? "" : nome.strip().replaceAll("\s+", " ");
+        if (limpo.isEmpty()) {
+            return null;
+        }
+        if (limpo.length() > 120) {
+            throw ErroDeRegra.regra("NOME_INVALIDO", "O nome vai até 120 caracteres.");
+        }
+        return limpo;
+    }
+
     private static Administrador paraDto(UsuarioEntidade u) {
-        return new Administrador(u.getId(), u.getEmail(), u.isAtivo(), u.isTrocarSenha(), u.getCriadoEm());
+        return new Administrador(u.getId(), u.getEmail(), u.getNome(), u.isAtivo(), u.isTrocarSenha(), u.getCriadoEm());
     }
 
     private static String senhaTemporaria() {

@@ -30,7 +30,7 @@ public class AutenticacaoService {
         this.hashFalso = codificador.encode(SENHA_FALSA);
     }
 
-    public record Sessao(String token, boolean trocarSenha, Instant expiraEm) {
+    public record Sessao(String token, boolean trocarSenha, Instant expiraEm, String nome) {
     }
 
     /** Credencial inválida responde sempre igual, sem dizer se errou o e-mail ou a senha. */
@@ -68,7 +68,7 @@ public class AutenticacaoService {
 
     private Sessao sessaoDe(UsuarioEntidade usuario) {
         return new Sessao(jwt.generateToken(usuario.getEmail()), usuario.isTrocarSenha(),
-                Instant.now().plusMillis(jwt.expiracaoEmMillis()));
+                Instant.now().plusMillis(jwt.expiracaoEmMillis()), usuario.getNome());
     }
 
     private static ErroDeRegra credenciaisInvalidas() {
