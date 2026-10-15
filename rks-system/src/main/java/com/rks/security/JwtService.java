@@ -26,7 +26,7 @@ public class JwtService {
     @Value("${jwt.secret:}")
     private String secretKey;
 
-    @Value("${jwt.expiration:86400000}")
+    @Value("${jwt.expiration:43200000}")
     private long jwtExpiration;
 
     private SecretKey key;
@@ -52,6 +52,10 @@ public class JwtService {
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException("SHA-256 algorithm is not available", exception);
         }
+    }
+
+    public long expiracaoEmMillis() {
+        return jwtExpiration;
     }
 
     public String generateToken(UserDetails userDetails) {

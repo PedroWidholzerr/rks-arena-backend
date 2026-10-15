@@ -5,6 +5,7 @@ import com.rks.security.JwtAuthenticationFilter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -48,12 +49,19 @@ public class SecurityConfig {
                         exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // AD-14: duas áreas de API e negação por padrão. Cada rota cai em exatamente uma regra.
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Cadastro público não existe: só administradores, criados por configuração.
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/healthz", "/livez", "/readyz").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        // Só o token de quem ainda precisa trocar a senha, ou o de um admin, chega aqui.
+                        .requestMatchers(HttpMethod.POST, "/api/auth/password")
+                                .hasAnyRole("ADMIN", "SENHA_PENDENTE")
+                        .requestMatchers(HttpMethod.GET, "/healthz", "/livez", "/readyz").permitAll()
+                        // Área pública: só leitura (a escrita da Inscrição entra na O3).
+                        .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .anyRequest().denyAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
