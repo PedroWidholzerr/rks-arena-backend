@@ -2,6 +2,8 @@ package com.rks.api;
 
 import com.rks.application.erro.ErroDeRegra;
 import com.rks.domain.rules.PlacarInvalidoException;
+import com.rks.domain.rules.TransicaoInvalidaException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -9,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -33,6 +36,12 @@ public class TratadorDeErros {
 
     @ExceptionHandler(ErroDeRegra.class)
     ResponseEntity<ProblemDetail> regra(ErroDeRegra erro) {
+        ResponseEntity<ProblemDetail> base = regraComStatus(erro);
+        erro.extras().forEach((chave, valor) -> base.getBody().setProperty(chave, valor));
+        return base;
+    }
+
+    private static ResponseEntity<ProblemDetail> regraComStatus(ErroDeRegra erro) {
         HttpStatus status = switch (erro.tipo()) {
             case NAO_ENCONTRADO -> HttpStatus.NOT_FOUND;
             case CONFLITO -> HttpStatus.CONFLICT;
@@ -45,6 +54,18 @@ public class TratadorDeErros {
     @ExceptionHandler(PlacarInvalidoException.class)
     ResponseEntity<ProblemDetail> placar(PlacarInvalidoException erro) {
         return resposta(HttpStatus.UNPROCESSABLE_ENTITY, erro.codigo(), erro.getMessage());
+    }
+
+    @ExceptionHandler(TransicaoInvalidaException.class)
+    ResponseEntity<ProblemDetail> transicao(TransicaoInvalidaException erro) {
+        return resposta(HttpStatus.CONFLICT, erro.codigo(), erro.getMessage());
+    }
+
+    /** Violação de restrição do banco que escapou das validações: conflito, nunca 500 com detalhes do SQL. */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<ProblemDetail> integridade(DataIntegrityViolationException erro) {
+        return resposta(HttpStatus.CONFLICT, "CONFLITO_DE_DADOS",
+                "A operação conflita com dados existentes. Recarregue e tente de novo.");
     }
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
@@ -65,6 +86,11 @@ public class TratadorDeErros {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ResponseEntity<ProblemDetail> corpoIlegivel(HttpMessageNotReadableException erro) {
         return resposta(HttpStatus.BAD_REQUEST, "REQUISICAO_INVALIDA", "O corpo da requisição não está no formato esperado.");
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ProblemDetail> tipoErrado(MethodArgumentTypeMismatchException erro) {
+        return resposta(HttpStatus.BAD_REQUEST, "REQUISICAO_INVALIDA", "O valor de " + erro.getName() + " não está no formato esperado.");
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)
