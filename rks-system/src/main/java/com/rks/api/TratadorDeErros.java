@@ -12,6 +12,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -47,6 +48,7 @@ public class TratadorDeErros {
             case CONFLITO -> HttpStatus.CONFLICT;
             case REGRA -> HttpStatus.UNPROCESSABLE_ENTITY;
             case NAO_AUTENTICADO -> HttpStatus.UNAUTHORIZED;
+            case INDISPONIVEL -> HttpStatus.SERVICE_UNAVAILABLE;
         };
         return resposta(status, erro.codigo(), erro.getMessage());
     }
@@ -91,6 +93,11 @@ public class TratadorDeErros {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ResponseEntity<ProblemDetail> tipoErrado(MethodArgumentTypeMismatchException erro) {
         return resposta(HttpStatus.BAD_REQUEST, "REQUISICAO_INVALIDA", "O valor de " + erro.getName() + " não está no formato esperado.");
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<ProblemDetail> uploadGrande(MaxUploadSizeExceededException erro) {
+        return resposta(HttpStatus.CONTENT_TOO_LARGE, "IMAGEM_GRANDE", "A imagem passa de 2 MB. Envie um arquivo menor.");
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)

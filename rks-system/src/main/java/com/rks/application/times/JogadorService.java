@@ -1,6 +1,7 @@
 package com.rks.application.times;
 
 import com.rks.application.erro.ErroDeRegra;
+import com.rks.application.imagens.ImageStorage;
 import com.rks.infra.persistencia.JogadorRepositorio;
 import com.rks.infra.persistencia.entidade.JogadorEntidade;
 import org.springframework.stereotype.Service;
@@ -23,16 +24,18 @@ public class JogadorService {
     }
 
     private final JogadorRepositorio jogadores;
+    private final ImageStorage armazenamento;
 
-    public JogadorService(JogadorRepositorio jogadores) {
+    public JogadorService(JogadorRepositorio jogadores, ImageStorage armazenamento) {
         this.jogadores = jogadores;
+        this.armazenamento = armazenamento;
     }
 
     /** Busca por Riot ID; texto vazio lista todos. */
     @Transactional(readOnly = true)
     public List<Jogador> buscar(String busca) {
         String termo = busca == null ? "" : busca.strip().toLowerCase(Locale.ROOT);
-        return jogadores.buscar(termo).stream().map(JogadorService::paraDto).toList();
+        return jogadores.buscar(termo).stream().map(this::paraDto).toList();
     }
 
     @Transactional(readOnly = true)
@@ -82,7 +85,8 @@ public class JogadorService {
         return nick.toLowerCase(Locale.ROOT) + "#" + tag.toLowerCase(Locale.ROOT);
     }
 
-    static Jogador paraDto(JogadorEntidade j) {
-        return new Jogador(j.getId(), j.getNick(), j.getTag(), j.getNick() + "#" + j.getTag(), j.getFotoUrl(), j.getCriadoEm());
+    Jogador paraDto(JogadorEntidade j) {
+        return new Jogador(j.getId(), j.getNick(), j.getTag(), j.getNick() + "#" + j.getTag(),
+                armazenamento.publicUrl(j.getFotoUrl()), j.getCriadoEm());
     }
 }

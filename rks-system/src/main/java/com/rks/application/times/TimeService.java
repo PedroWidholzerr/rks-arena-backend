@@ -1,6 +1,7 @@
 package com.rks.application.times;
 
 import com.rks.application.erro.ErroDeRegra;
+import com.rks.application.imagens.ImageStorage;
 import com.rks.infra.persistencia.ParticipacaoRepositorio;
 import com.rks.infra.persistencia.TimeRepositorio;
 import com.rks.infra.persistencia.entidade.TimeEntidade;
@@ -22,15 +23,17 @@ public class TimeService {
 
     private final TimeRepositorio times;
     private final ParticipacaoRepositorio participacoes;
+    private final ImageStorage armazenamento;
 
-    public TimeService(TimeRepositorio times, ParticipacaoRepositorio participacoes) {
+    public TimeService(TimeRepositorio times, ParticipacaoRepositorio participacoes, ImageStorage armazenamento) {
         this.times = times;
         this.participacoes = participacoes;
+        this.armazenamento = armazenamento;
     }
 
     @Transactional(readOnly = true)
     public List<Time> listar() {
-        return times.findAllByOrderByNomeAsc().stream().map(TimeService::paraDto).toList();
+        return times.findAllByOrderByNomeAsc().stream().map(this::paraDto).toList();
     }
 
     @Transactional(readOnly = true)
@@ -90,7 +93,8 @@ public class TimeService {
         t.setTagKey(chave);
     }
 
-    static Time paraDto(TimeEntidade t) {
-        return new Time(t.getId(), t.getNome(), t.getTag(), t.getLogoUrl(), t.getCriadoEm());
+    /** O banco guarda só a chave do objeto; a tela recebe a URL pública (ou nada, e mostra o avatar de iniciais). */
+    Time paraDto(TimeEntidade t) {
+        return new Time(t.getId(), t.getNome(), t.getTag(), armazenamento.publicUrl(t.getLogoUrl()), t.getCriadoEm());
     }
 }

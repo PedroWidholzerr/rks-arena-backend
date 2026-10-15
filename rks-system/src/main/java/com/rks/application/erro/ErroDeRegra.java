@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class ErroDeRegra extends RuntimeException {
 
-    public enum Tipo { NAO_ENCONTRADO, CONFLITO, REGRA, NAO_AUTENTICADO }
+    public enum Tipo { NAO_ENCONTRADO, CONFLITO, REGRA, NAO_AUTENTICADO, INDISPONIVEL }
 
     private final String codigo;
     private final Tipo tipo;
@@ -37,6 +37,10 @@ public class ErroDeRegra extends RuntimeException {
 
     public static ErroDeRegra conflito(String codigo, String mensagem, Map<String, Object> extras) {
         return new ErroDeRegra(Tipo.CONFLITO, codigo, mensagem, extras);
+    }
+
+    public static ErroDeRegra indisponivel(String codigo, String mensagem) {
+        return new ErroDeRegra(Tipo.INDISPONIVEL, codigo, mensagem);
     }
 
     public static ErroDeRegra regra(String codigo, String mensagem) {

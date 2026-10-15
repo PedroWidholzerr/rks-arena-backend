@@ -3,6 +3,7 @@ package com.rks.application.classificacao;
 import com.rks.application.auditoria.AuditoriaService;
 import com.rks.application.campeonatos.CampeonatoService;
 import com.rks.application.erro.ErroDeRegra;
+import com.rks.application.imagens.ImageStorage;
 import com.rks.domain.rules.EstadoPartida;
 import com.rks.domain.standings.Classificacao;
 import com.rks.domain.standings.DecisaoManual;
@@ -48,7 +49,7 @@ public class ClassificacaoService {
 
     private static final Logger log = LoggerFactory.getLogger(ClassificacaoService.class);
 
-    public record LinhaDaTabela(int posicao, UUID timeId, String nome, String tag, int jogadas, int vitorias,
+    public record LinhaDaTabela(int posicao, UUID timeId, String nome, String tag, String logoUrl, int jogadas, int vitorias,
                                 int derrotas, int jogosAFavor, int jogosContra, int saldo, int pontos, boolean empate) {
     }
 
@@ -70,10 +71,12 @@ public class ClassificacaoService {
     private final CampeonatoService campeonatos;
     private final UsuarioRepositorio usuarios;
     private final AuditoriaService auditoria;
+    private final ImageStorage armazenamento;
 
     public ClassificacaoService(FaseRepositorio fases, ParticipacaoRepositorio participacoes, PartidaRepositorio partidas,
                                 TimeRepositorio times, DecisaoDesempateRepositorio decisoes, CampeonatoService campeonatos,
-                                UsuarioRepositorio usuarios, AuditoriaService auditoria) {
+                                UsuarioRepositorio usuarios, AuditoriaService auditoria, ImageStorage armazenamento) {
+        this.armazenamento = armazenamento;
         this.fases = fases;
         this.participacoes = participacoes;
         this.partidas = partidas;
@@ -171,6 +174,7 @@ public class ClassificacaoService {
         List<LinhaDaTabela> linhas = c.linhas().stream().map(l -> {
             TimeEntidade t = porId.get(l.timeId());
             return new LinhaDaTabela(l.posicao(), l.timeId(), t == null ? "" : t.getNome(), t == null ? "" : t.getTag(),
+                    t == null ? null : armazenamento.publicUrl(t.getLogoUrl()),
                     l.jogadas(), l.vitorias(), l.derrotas(), l.jogosAFavor(), l.jogosContra(), l.saldo(), l.pontos(),
                     l.empate());
         }).toList();
