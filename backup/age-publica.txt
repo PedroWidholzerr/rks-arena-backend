@@ -1,0 +1,5 @@
+# Chave PÚBLICA do age usada para criptografar o backup semanal (pode ficar no repositório).
+# A chave PRIVADA fica fora do Git, com o mantenedor. Para gerar o par:
+#   age-keygen -o chave-privada.txt        (guarde este arquivo longe do repositório)
+# e cole aqui, no lugar da linha abaixo, a linha "Public key: age1..." que o comando imprime.
+AGE_CHAVE_PUBLICA_PENDENTE

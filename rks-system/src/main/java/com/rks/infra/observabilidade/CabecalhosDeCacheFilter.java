@@ -12,12 +12,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Respostas do admin e de login nunca ficam em cache de borda (UX-DR14, C-2). As públicas ficam sem
- * cache até a história 2.33 medir o {@code s-maxage}; o front mostra "atualizado há…" pelo {@code atualizadoEm}.
+ * Respostas do admin e de login nunca ficam em cache de borda (UX-DR14, C-2). As públicas de dados levam {@code s-maxage=30} com {@code stale-while-revalidate} (história 2.33); o front
+ * mostra "atualizado às HH:mm" pelo {@code atualizadoEm}, então o dado defasado nunca se passa por novo.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class CabecalhosDeCacheFilter extends OncePerRequestFilter {
+
+    /** A borda serve a última versão por 30 s e, com o backend dormindo, até 1 dia enquanto revalida (AD-20). */
+    public static final String CACHE_PUBLICO = "public, s-maxage=30, stale-while-revalidate=86400";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -25,8 +28,11 @@ public class CabecalhosDeCacheFilter extends OncePerRequestFilter {
         String caminho = request.getRequestURI();
         if (caminho.startsWith("/api/admin/") || caminho.startsWith("/api/auth/")) {
             response.setHeader("Cache-Control", "no-store");
-        } else if (caminho.startsWith("/api/public/")) {
-            response.setHeader("Cache-Control", "no-cache");
+        } else if (caminho.equals("/api/public/status")) {
+            // O front usa o status para saber se o backend acordou: nunca vem de cache.
+            response.setHeader("Cache-Control", "no-store");
+        } else if (caminho.startsWith("/api/public/") && "GET".equals(request.getMethod())) {
+            response.setHeader("Cache-Control", CACHE_PUBLICO);
         }
         chain.doFilter(request, response);
     }

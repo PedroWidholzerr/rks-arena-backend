@@ -1,0 +1,52 @@
+name: Backup semanal
+
+# pg_dump do banco, criptografado com age e guardado como artefato do repositório privado por 90 dias.
+# Segredo necessário (Settings > Secrets and variables > Actions): BACKUP_DATABASE_URL, no formato
+#   postgresql://USUARIO:SENHA@HOST:5432/postgres?sslmode=require   (session pooler do Supabase)
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # segundas, 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Conferir a chave pública do age
+        run: |
+          if ! grep -q '^age1' backup/age-publica.txt; then
+            echo "backup/age-publica.txt ainda não tem a chave pública (linha age1...). Veja o comentário do arquivo."
+            exit 1
+          fi
+
+      - name: Instalar o cliente PostgreSQL 17 e o age
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release age
+          wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/keyrings/pgdg.gpg
+          echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+
+      - name: pg_dump
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+        run: |
+          test -n "$BACKUP_DATABASE_URL" || { echo "Defina o segredo BACKUP_DATABASE_URL."; exit 1; }
+          pg_dump -Fc --no-owner --no-privileges --dbname "$BACKUP_DATABASE_URL" --file rks.dump
+          ls -l rks.dump
+
+      - name: Criptografar com age e apagar o dump aberto
+        run: |
+          age -R <(grep '^age1' backup/age-publica.txt) -o "rks-$(date +%F).dump.age" rks.dump
+          shred -u rks.dump
+          ls -l rks-*.dump.age
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backup-rks
+          path: rks-*.dump.age
+          retention-days: 90
+          if-no-files-found: error
