@@ -6,7 +6,7 @@ Legenda do estado: **pendente** (ainda não executado), **aguardando o mantenedo
 
 ## 1.2 Starter do Flyway no Spring Boot 4.0.3
 
-Estado: **pendente de execução** (a verificação roda no fim do epic, junto com `./mvnw test`).
+Estado: **confirmado** em 2026-10-15.
 
 Dependências candidatas, já no `pom.xml`:
 
@@ -23,7 +23,13 @@ Pontos a conferir na execução:
 - Registrar a versão resolvida (`./mvnw dependency:tree | grep -i -E "flyway|testcontainers"`).
 - Prova do spike: aplicar uma migração vazia `V0__spike.sql` em Postgres local ou no Supabase de teste e ver `./mvnw test` passar. A `V0` é descartada e não entra na `main`; quem prova o starter na `main` é a `V1__base.sql`, via `MigracaoV1IntegracaoTest`.
 
-Resultado `[ASSUMPTION: nome do starter do Flyway]`: **pendente**.
+Resultado `[ASSUMPTION: nome do starter do Flyway]`: **confirmado**. Com `spring-boot-starter-flyway` e `flyway-database-postgresql`, a aplicação subiu contra o projeto Supabase de teste (session pooler) e o Flyway aplicou `1 - base` ("Successfully applied 1 migration"). O `./mvnw test` sem Docker passa (8 testes). Versões resolvidas pelo BOM do Boot 4.0.3; ver `./mvnw dependency:tree`. Testcontainers 2.x compilou (`testcontainers-junit-jupiter`, `testcontainers-postgresql`), mas a execução do `MigracaoV1IntegracaoTest` aguarda o Docker Desktop ligado.
+
+Observações do projeto Supabase de teste:
+
+- A conexão direta (`db.<ref>.supabase.co`) só resolve em IPv6 e não foi alcançável nesta máquina; o **session pooler** (`aws-1-sa-east-1.pooler.supabase.com:5432`, usuário `postgres.<ref>`) funcionou, como o Spine prevê.
+- `[ASSUMPTION: PostgreSQL 17]`: **confirmado**, versão 17.11 (lida no log do Flyway).
+- A V1 já está aplicada no projeto de teste; nunca editar a V1, só migração nova.
 
 ## 1.1 Provedores gratuitos sem cartão
 
@@ -35,7 +41,7 @@ Estado: **aguardando o mantenedor** (criar as contas e preencher a tabela).
 | Render free: RAM, horas por mês, tempo de repouso, banda | Anotar do painel | pendente |
 | Supabase free: 2 projetos (produção e teste) sem cartão | Criar os dois projetos | pendente |
 | Supabase free: limites de banco, Storage e banda | Anotar do painel | pendente |
-| PostgreSQL 17 disponível no Supabase `[ASSUMPTION]` | `SHOW server_version;` | pendente |
+| PostgreSQL 17 disponível no Supabase `[ASSUMPTION]` | Log do Flyway | **confirmado** (17.11, projeto de teste) |
 | Turnstile: site criado sem cartão | Criar o site | pendente |
 | Vercel Hobby: build com Node 22.x `[ASSUMPTION]` | Configuração do projeto | pendente |
 | Node 22.x disponível para o build | Painel da Vercel | pendente |
