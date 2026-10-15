@@ -37,14 +37,14 @@ Estado: **aguardando o mantenedor** (criar as contas e preencher a tabela).
 
 | Item | Como verificar | Resultado |
 |---|---|---|
-| Render free: serviço Docker sem cartão `[ASSUMPTION]` | Criar o serviço Docker | **confirmado** em 2026-10-15: serviço `rks-arena-backend` criado e no ar (`/readyz` 200); falta o mantenedor confirmar que nenhuma etapa pediu cartão |
-| Render free: RAM, horas por mês, tempo de repouso, banda | Anotar do painel | RAM **512 MB** e **0,1 CPU** (informado pelo mantenedor). Horas, banda e repouso: pendente. O `-Xmx300m` do Dockerfile cabe nos 512 MB com folga para metaspace e threads. A CPU de 0,1 explica o cold start mais lento (ver medições em `docs/deploy-render.md`). |
+| Render free: serviço Docker sem cartão `[ASSUMPTION]` | Criar o serviço Docker | **confirmado** em 2026-10-15: serviço `rks-arena-backend` criado e no ar (`/readyz` 200); nenhuma etapa pediu cartão (confirmado pelo mantenedor) |
+| Render free: RAM, horas por mês, tempo de repouso, banda | Anotar do painel | RAM **512 MB** e **0,1 CPU** (informado pelo mantenedor). Horas por mês: **não aparecem no painel** (mantenedor); o valor publicado pela Render para o plano gratuito é de cerca de 750 h por mês, **não verificado aqui**; 1 serviço sempre ligado cabe nesse limite. Banda e repouso: pendentes (o repouso após 15 min sem requisição será observado na medição de cold start). O `-Xmx300m` do Dockerfile cabe nos 512 MB com folga para metaspace e threads. A CPU de 0,1 explica o cold start mais lento (ver medições em `docs/deploy-render.md`). |
 | Supabase free: 2 projetos (produção e teste) sem cartão `[ASSUMPTION]` | Criar os dois projetos | **refutado** nesta conta: só é possível 1 projeto (informado pelo mantenedor em 2026-10-15). Ver "Decisão: projeto Supabase único" abaixo. |
 | Supabase free: limites de banco, Storage e banda | Anotar do painel | pendente |
 | PostgreSQL 17 disponível no Supabase `[ASSUMPTION]` | Log do Flyway | **confirmado** (17.11, projeto de teste) |
 | Turnstile: site criado sem cartão `[ASSUMPTION]` | Criar o site | **confirmado** em 2026-10-15: criado sem cartão (informado pelo mantenedor). As chaves ficam em `.env` local e entram em uso no Epic 4. |
-| Vercel Hobby: build com Node 22.x `[ASSUMPTION]` | Configuração do projeto | pendente |
-| Node 22.x disponível para o build | Painel da Vercel | pendente |
+| Vercel Hobby: build com Node 22.x `[ASSUMPTION]` | Configuração do projeto | **confirmado**: Node 22 configurado no projeto (mantenedor, 2026-10-15) |
+| Node 22.x disponível para o build | Painel da Vercel | **confirmado** (mesma configuração acima) |
 
 ## 1.3 Cota do GitHub Actions e pausa do Supabase
 
