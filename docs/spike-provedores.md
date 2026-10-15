@@ -1,0 +1,52 @@
+# Spikes do Epic 1: provedores, Flyway e cotas
+
+Este documento registra os resultados dos spikes 1.1, 1.2 e 1.3. Cada `[ASSUMPTION]` do Spine termina como **confirmado** ou **refutado**. Se algum for refutado, a história para e pergunta, sem trocar de provedor sozinha.
+
+Legenda do estado: **pendente** (ainda não executado), **aguardando o mantenedor** (exige login ou painel de provedor), **confirmado**, **refutado**.
+
+## 1.2 Starter do Flyway no Spring Boot 4.0.3
+
+Estado: **pendente de execução** (a verificação roda no fim do epic, junto com `./mvnw test`).
+
+Dependências candidatas, já no `pom.xml`:
+
+| Artefato | Versão | Escopo | Observação |
+|---|---|---|---|
+| `org.springframework.boot:spring-boot-starter-flyway` | gerenciada pelo Boot 4.0.3 | compile | No Boot 4 o `flyway-core` sozinho não ativa a autoconfiguração; é preciso o starter. |
+| `org.flywaydb:flyway-database-postgresql` | gerenciada pelo Boot 4.0.3 | runtime | Módulo do driver PostgreSQL, exigido pelo Flyway 10 ou superior. |
+| `org.testcontainers:testcontainers-junit-jupiter` | gerenciada pelo Boot 4.0.3 | test | Testcontainers 2.x: os módulos ganharam o prefixo `testcontainers-`. |
+| `org.testcontainers:testcontainers-postgresql` | gerenciada pelo Boot 4.0.3 | test | Classe `org.testcontainers.postgresql.PostgreSQLContainer`. |
+
+Pontos a conferir na execução:
+
+- O Spine lista Testcontainers "1.x", mas o BOM do Boot 4 gerencia a linha 2.x. Se o BOM não gerenciar essas versões, registrar a versão exata aqui.
+- Registrar a versão resolvida (`./mvnw dependency:tree | grep -i -E "flyway|testcontainers"`).
+- Prova do spike: aplicar uma migração vazia `V0__spike.sql` em Postgres local ou no Supabase de teste e ver `./mvnw test` passar. A `V0` é descartada e não entra na `main`; quem prova o starter na `main` é a `V1__base.sql`, via `MigracaoV1IntegracaoTest`.
+
+Resultado `[ASSUMPTION: nome do starter do Flyway]`: **pendente**.
+
+## 1.1 Provedores gratuitos sem cartão
+
+Estado: **aguardando o mantenedor** (criar as contas e preencher a tabela).
+
+| Item | Como verificar | Resultado |
+|---|---|---|
+| Render free: serviço Docker sem cartão | Criar o serviço Docker | pendente |
+| Render free: RAM, horas por mês, tempo de repouso, banda | Anotar do painel | pendente |
+| Supabase free: 2 projetos (produção e teste) sem cartão | Criar os dois projetos | pendente |
+| Supabase free: limites de banco, Storage e banda | Anotar do painel | pendente |
+| PostgreSQL 17 disponível no Supabase `[ASSUMPTION]` | `SHOW server_version;` | pendente |
+| Turnstile: site criado sem cartão | Criar o site | pendente |
+| Vercel Hobby: build com Node 22.x `[ASSUMPTION]` | Configuração do projeto | pendente |
+| Node 22.x disponível para o build | Painel da Vercel | pendente |
+
+## 1.3 Cota do GitHub Actions e pausa do Supabase
+
+Estado: **aguardando o mantenedor** (depende do CI da história 1.9 e do projeto Supabase).
+
+- Workflow de teste com `pg_dump` e `curl /readyz` no repositório privado: pendente.
+- Minutos gastos por execução: pendente.
+- Cota mensal do plano: pendente.
+- **Data de início da observação da pausa do Supabase:** a preencher quando o primeiro acesso ao banco for feito.
+- Conclusão ("a conexão semanal conta como atividade?"): só depois de pelo menos 8 dias da data de início. **Esta história fica aberta até lá.**
+- Se a conexão não contar: criar o item "usar `aquecer.yml` semanal" na história 2.32, sem mudar nenhuma AD.
