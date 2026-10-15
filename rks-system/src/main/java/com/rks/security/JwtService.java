@@ -21,7 +21,7 @@ public class JwtService {
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
     private static final int MINIMUM_HMAC_KEY_LENGTH_BYTES = 32;
 
-    @Value("${jwt.secret:rksarena-secret-key-for-jwt-token-generation-change-in-production-2026-secure-key}")
+    @Value("${jwt.secret:}")
     private String secretKey;
 
     @Value("${jwt.expiration:86400000}")
@@ -36,7 +36,7 @@ public class JwtService {
 
     private byte[] resolveSigningKey(String configuredSecret) {
         if (configuredSecret == null || configuredSecret.isBlank()) {
-            throw new IllegalStateException("JWT secret must not be blank");
+            throw new IllegalStateException("JWT_SECRET não definido: configure a variável de ambiente JWT_SECRET (sem valor padrão, mínimo recomendado de 32 caracteres).");
         }
 
         byte[] secretBytes = configuredSecret.getBytes(StandardCharsets.UTF_8);

@@ -40,7 +40,8 @@ class JwtServiceTest {
         JwtService jwtService = new JwtService();
         setField(jwtService, "secretKey", "   ");
 
-        assertThrows(IllegalStateException.class, jwtService::init);
+        IllegalStateException erro = assertThrows(IllegalStateException.class, jwtService::init);
+        assertTrue(erro.getMessage().contains("JWT_SECRET"));
     }
 
     private void setField(Object target, String fieldName, Object value) throws Exception {
