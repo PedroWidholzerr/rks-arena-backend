@@ -119,7 +119,7 @@ public class AdministradorService {
     }
 
     /** Nome de exibição: sem espaços nas pontas, até 120 caracteres; vazio vira "sem nome". */
-    static String nomeLimpo(String nome) {
+    public static String nomeLimpo(String nome) {
         String limpo = nome == null ? "" : nome.strip().replaceAll("\s+", " ");
         if (limpo.isEmpty()) {
             return null;
