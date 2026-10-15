@@ -38,8 +38,10 @@ curl -s -o /dev/null -w "%{time_total}s\n" https://<serviço>.onrender.com/ready
 
 | Medição | Data | Tempo até responder 200 |
 |---|---|---|
-| 1 | pendente | pendente |
-| 2 | pendente | pendente |
-| 3 | pendente | pendente |
+| 1 | 2026-10-15 15:53 | 78,5 s |
+| 2 | 2026-10-15 16:10 | 82,4 s |
+| 3 | 2026-10-15 16:28 | 77,4 s |
 
 Expectativa do NFR-4: cerca de 1 minuto.
+
+**Resultado (2026-10-15):** média de **79,4 s** (77,4 a 82,4 s), com o serviço dormindo por cerca de 17 minutos antes de cada medição e o instante contado até o primeiro `/readyz` 200. Fica abaixo do gatilho de revisão do host (90 s), mas com pouca folga, então o `apiClient` do front repete por até ~90 s e mostra "Acordando o servidor…" (AD-20). Com 0,1 CPU, o tempo é dominado pela subida da JVM e do Flyway.
